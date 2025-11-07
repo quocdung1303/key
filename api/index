@@ -1,0 +1,139 @@
+from flask import Flask, request
+import requests
+from datetime import datetime
+
+app = Flask(__name__)
+
+@app.route("/")
+def index():
+    token = request.args.get('token', '')
+    
+    if not token:
+        return '<h1 style="color:#fff;text-align:center;padding:50px;">Token không hợp lệ</h1>'
+    
+    # Lấy key từ trang 1
+    try:
+        resp = requests.get(f"https://areskey.vercel.app/api/get_key/{token}", timeout=10)
+        data = resp.json()
+        
+        if "error" in data:
+            return '<h1 style="color:#fff;text-align:center;padding:50px;">Link không hợp lệ hoặc đã hết hạn</h1>'
+        
+        key = data["key"]
+        expires = datetime.fromtimestamp(data["created_at"] + 86400).strftime('%d/%m/%Y %H:%M')
+        
+        return f'''
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>License Key - ARES</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }}
+        .container {{ max-width: 500px; width: 100%; }}
+        .banner {{
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: rgba(0, 255, 157, 0.1);
+            border: 2px solid #00ff9d;
+            border-radius: 15px;
+        }}
+        h1 {{
+            font-size: 56px;
+            color: #00ff9d;
+            text-shadow: 0 0 30px #00ff9d;
+            letter-spacing: 12px;
+        }}
+        .subtitle {{ font-size: 13px; color: #ffc107; letter-spacing: 3px; }}
+        .box {{
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 157, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+        }}
+        h2 {{ color: #00ff9d; margin-bottom: 20px; }}
+        .key-box {{ display: flex; gap: 10px; margin: 25px 0; }}
+        .key-box input {{
+            flex: 1;
+            padding: 18px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ff9d;
+            border-radius: 8px;
+            color: #00ff9d;
+            font-family: monospace;
+            font-size: 16px;
+            font-weight: bold;
+        }}
+        .btn-copy {{
+            background: #ffc107;
+            color: #0a0e27;
+            padding: 18px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }}
+        .info {{
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            padding: 25px;
+            margin-top: 25px;
+        }}
+        .info h3 {{ color: #ffc107; margin-bottom: 15px; }}
+        .info ul {{ list-style: none; text-align: left; }}
+        .info li {{ padding: 10px 0; color: #ccc; }}
+        .warn {{ color: #ff5252; margin-top: 20px; font-weight: bold; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="banner">
+            <h1>ARES</h1>
+            <div class="subtitle">TOOL V23 - LICENSE SYSTEM</div>
+        </div>
+        <div class="box">
+            <h2>🎉 License Key của bạn</h2>
+            <div class="key-box">
+                <input type="text" id="key" value="{key}" readonly>
+                <button class="btn-copy" onclick="copy()">📋 Copy</button>
+            </div>
+            <div class="info">
+                <h3>⏰ Thông tin Key</h3>
+                <ul>
+                    <li>🔑 Key: <strong>{key}</strong></li>
+                    <li>⏳ Hết hạn: <strong>{expires}</strong></li>
+                    <li>📍 Tối đa: <strong>3 IP khác nhau</strong></li>
+                </ul>
+            </div>
+            <p class="warn">⚠️ Lưu lại key này!</p>
+        </div>
+    </div>
+    <script>
+        function copy() {{
+            document.getElementById('key').select();
+            document.execCommand('copy');
+            alert('Đã copy License Key!');
+        }}
+    </script>
+</body>
+</html>
+        '''
+    except Exception as e:
+        return f'<h1 style="color:#fff;text-align:center;padding:50px;">Lỗi: {e}</h1>'
+
+if __name__ == "__main__":
+    app.run(debug=True)
