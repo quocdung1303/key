@@ -9,15 +9,75 @@ def index():
     token = request.args.get('token', '')
     
     if not token:
-        return '<h1 style="color:#fff;text-align:center;padding:50px;">Token không hợp lệ</h1>'
+        return '''
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARES - Token Required</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 { color: #ff5252; text-align: center; }
+        p { color: #ccc; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>❌ Token không hợp lệ</h1>
+        <p>Vui lòng sử dụng link được cung cấp từ hệ thống</p>
+    </div>
+</body>
+</html>
+        '''
     
-    # Lấy key từ trang 1
+    # Lấy key từ project 1
     try:
         resp = requests.get(f"https://areskey.vercel.app/api/get_key/{token}", timeout=10)
         data = resp.json()
         
         if "error" in data:
-            return '<h1 style="color:#fff;text-align:center;padding:50px;">Link không hợp lệ hoặc đã hết hạn</h1>'
+            return '''
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARES - Error</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 { color: #ff5252; text-align: center; }
+        p { color: #ccc; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>❌ Link không hợp lệ hoặc đã hết hạn</h1>
+        <p>Vui lòng lấy link mới từ hệ thống</p>
+    </div>
+</body>
+</html>
+            '''
         
         key = data["key"]
         expires = datetime.fromtimestamp(data["created_at"] + 86400).strftime('%d/%m/%Y %H:%M')
@@ -133,7 +193,37 @@ def index():
 </html>
         '''
     except Exception as e:
-        return f'<h1 style="color:#fff;text-align:center;padding:50px;">Lỗi: {e}</h1>'
+        return f'''
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARES - Error</title>
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        body {{
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }}
+        h1 {{ color: #ff5252; text-align: center; }}
+        p {{ color: #ccc; text-align: center; margin-top: 20px; }}
+    </style>
+</head>
+<body>
+    <div>
+        <h1>❌ Lỗi hệ thống</h1>
+        <p>{str(e)}</p>
+    </div>
+</body>
+</html>
+        '''
 
 if __name__ == "__main__":
     app.run(debug=True)
